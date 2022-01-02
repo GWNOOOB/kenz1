@@ -269,6 +269,8 @@ var q = args.join(' ')
 hit_today.push(command)
 var timestampi = speed();
 var latensyi = speed() - timestampi
+var sender = isGroup ? zer.participant : zer.key.remoteJid
+var senderr = zer.key.fromMe ? zero.user.jid : zer.key.remoteJid.endsWith('@g.us') ? zer.participant : zer.key.remoteJid
 var pes = (type === 'conversation' && zer.message.conversation) ? zer.message.conversation : (type == 'imageMessage') && zer.message.imageMessage.caption ? zer.message.imageMessage.caption : (type == 'videoMessage') && zer.message.videoMessage.caption ? zer.message.videoMessage.caption : (type == 'extendedTextMessage') && zer.message.extendedTextMessage.text ? zer.message.extendedTextMessage.text : ''
 var messagesD = pes.slice(0).trim().split(/ +/).shift().toLowerCase()
 var botNumber = zero.user.jid
@@ -2044,7 +2046,7 @@ reply (`*BOT INI MEMAKAI RDP BUKAN TERMUX!*
 *_BOT INI MEMAKAI RDP BUKAN TERMUX/HEROKU/WIBUSOFT_*
 *_DI JAMIN ANTI DELAY & 24 JAM!_*`)
 
-              /**zero.sendMessage(from, await getBuffer(gopeynya), image, {quoted: freply, caption: teksnya, thumbnail: Buffer.alloc(0) })**/
+              /**zero.sendMessage(from, await getBuffer(gopeynya), image, {quoted: zer, caption: teksnya, thumbnail: Buffer.alloc(0) })**/
 await sleep(3000)
               txtt =`*HAI KAK ${pushname}*\n*JIKA INGIN JADIBOT ATAU MAU JOIN MURID BOT*\n*PENCET SALAH SATU DI BAWAH*`
 
@@ -2928,12 +2930,19 @@ anu = fs.readFileSync(`${q}`)
 reply(String(anu))
 break
 case 'infogempa':
-              anu = await fetchJson(`https://bx-hunter.herokuapp.com/api/info/gempa?apikey=${apikey7}`, {method: 'get'})
-					gempa = `❏ *INFO GEMPA*\n\n❏ Waktu : ${anu.result.Waktu}\n❏ Lintang : ${anu.result.Lintang}\n❏ Bujur : ${anu.result.Bujur}\n❏ Magnitudo : ${anu.result.Magnitudo}\n❏ Kedalaman : ${anu.result.Kedalaman}\n❏ Wilayah : ${anu.result.Wilayah}`
-					reply(mess.wait)
-					buff = await getBuffer(anu.result.Map)
-					zero.sendMessage(from, buff, image, {quoted: zer, caption: gempa})
-					break 
+                
+reply(mess.wait)
+                get_result = await fetchJson(`http://api.lolhuman.xyz/api/infogempa?apikey=${setting.lolkey}`)
+                get_result = get_result.result
+                ini_txt = `Lokasi : ${get_result.lokasi}\n`
+                ini_txt += `Waktu : ${get_result.waktu}\n`
+                ini_txt += `Potensi : ${get_result.potensi}\n`
+                ini_txt += `Magnitude : ${get_result.magnitude}\n`
+                ini_txt += `Kedalaman : ${get_result.kedalaman}\n`
+                ini_txt += `Koordinat : ${get_result.koordinat}`
+                get_buffer = await getBuffer(get_result.map)
+                zero.sendMessage(from, get_buffer, image, { quoted: zer, caption: ini_txt }) 
+                break
 case 'herolist':
 await herolist().then((ress) => {
 let listt = `*List hero untuk feature ${prefix}herodetail*\n\n`
@@ -3287,28 +3296,13 @@ case 'githubstalk':
 					zero.sendMessage(from, buff, image, {quoted: zer, caption: gstalk})
 					break 
 					case 'translate':
-				case 'ts':
-try{
-					if ( args.length === 1 ){
-						tekss = zer.message.extendedTextMessage.contextInfo.quotedMessage.conversation
-						translate(tekss, {client: 'gtx', to:args[0]})
-						.then((res) =>{
-							reply(res.text)
-							}) 
-						} else
-			if(args.length > 0 ) {
-				ngab = args.join(' ')
-			teks = ngab.split(' ')[0];
-			bhs = ngab.split(' ')[1];
-			  translate(teks, {client: 'gtx', to:bhs})
-			  .then((res) =>{
-				  reply(res.text)
-				  })
-				}
-			} catch (e){
-				reply(mess.error.api)
-			}
-				  break
+                //[❗] case by DappaGanz
+                ct = body.slice(11)
+                reply(mess.wait)
+                asu = await fetchJson(`https://api-yogipw.herokuapp.com/api/translate?kata=${ct}&apikey=yogipw`)
+                dapp = `English : ${ct}\nIndonesia : ${asu.result.text}`
+                zero.sendMessage(from, dapp, text, {quoted: zer})
+                break
 				case 'playstore':
       if(!q) return reply('lu nyari apa?')
             let play = await hx.playstore(`${q}`)
@@ -4802,6 +4796,15 @@ case 'family100':
               fs.writeFileSync("./storage/game/caklontong.json", JSON.stringify(caklontong))
 }
               break
+             case 'term':
+             if (!q) return
+             exec(q, (err, stdout) => {
+             if (err) return reply(`${err}`)
+             if (stdout) {
+             reply(stdout)
+}
+})
+             break 
 //━━━━━━━━━━━━━━━[ AKHIR FITUR ]━━━━━━━━━━━━━━━━━//
         
 default:
@@ -4823,7 +4826,18 @@ e = String(err)
 reply(e)
 }
 }
+if (!isGroup && isCmd && !zer.key.fromMe){
+return sendButMessage(from, `*Maaf @${senderr.split('@')[0]}, command ${prefix + command} tidak ada dalam menu*`, `silahkan liat lagi di menu ya\n jangan spam bot`, [
+            {
+               "buttonId": ".menu",
+               "buttonText": {
+                  "displayText": "MENU"
+               },
+               "type": "RESPONSE"
+            }
+         ], {quoted:zer})
 }
+} 
 } catch (e) {
 e = String(e)
 if (!e.includes("this.isZero") && !e.includes("jid")) {
