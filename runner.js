@@ -311,7 +311,7 @@ console.log(`- [ 𝗚𝗿𝗼𝘂𝗽 𝗦𝗲𝘁𝘁𝗶𝗻𝗴 𝗖𝗵𝗮�
 
 	})
 
-antical = true
+antical = false
 zero.on("CB:Call", json => {
 if (antical === false) return
 let call;
